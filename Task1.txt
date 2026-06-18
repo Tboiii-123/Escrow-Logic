@@ -1,0 +1,110 @@
+Here is your **Task 1 (300–600 words) written document** — structured, clear, and senior-engineer level.
+
+---
+
+System Design Document
+
+## 1. Data Model
+
+The Escrow system is built around two core entities:
+
+### **Escrow**
+
+Represents a rental financial agreement between a tenant and landlord.
+
+**Key fields:**
+
+* `id (UUID)` — unique transaction identifier
+* `tenant_id (Fk)` — initiator and payer of escrow
+* `landlord_id (FK)` — beneficiary of escrow funds
+* `property_id (UUID)` — linked property under transaction
+* `amount (Decimal)` — funds held in escrow
+* `status (String)` — current state of the escrow (created, held, triggered, released, refunded, disputed)
+* `created_at (Timestamp)` — when escrow was initiated
+* `resolved_at (Timestamp, nullable)` — when escrow was finalized
+
+### **EscrowEvent**
+
+Provides an audit trail for key lifecycle actions.
+
+**Key fields:**
+
+* `id (UUID)`
+* `escrow_id (ForeignKey)`
+* `event_type (String)` — created, funded, triggered
+* `metadata (JSON)` — additional context (e.g. payment reference, notes)
+* `created_at (Timestamp)`
+
+This separation ensures Escrow holds the truth of financial state, while EscrowEvent records activity history.
+
+---
+
+## 2. Escrow Lifecycle
+
+The escrow moves through a controlled state machine:
+
+1. **CREATED**
+
+   * Triggered when tenant initiates escrow creation
+   * No funds are held yet
+
+2. **HELD**
+
+   * Triggered when tenant successfully funds escrow
+   * Funds are locked in escrow account
+
+3. **TRIGGERED**
+
+   * Triggered by landlord after successful property inspection confirmation
+
+4. **RELEASED**
+
+   * Funds transferred to landlord after successful trigger approval
+
+5. **REFUNDED**
+
+   * Funds returned to tenant due to failed inspection or cancellation
+
+6. **DISPUTED**
+
+   * Triggered when conflict arises between tenant and landlord; requires resolution
+
+
+
+---
+
+## 3. Failure Scenarios & Handling
+
+### 1. Duplicate Payment Requests
+
+If a tenant retries payment due to network failure, duplicate charges may occur.
+**Solution:** Idempotency keys ensure each financial action is executed only once.
+
+### 2. Unauthorized Access
+
+A user not part of the escrow attempts to trigger release or refund.
+**Solution:** Ownership checks ensure only tenant or landlord associated with the escrow can act.
+
+### 3. Invalid State Transition
+
+Example: attempting to release funds before escrow is triggered.
+**Solution:** Service-layer validation enforces strict state machine rules.
+
+---
+
+## 4. Security Considerations
+
+* **Authentication:** All endpoints require authenticated users.
+* **Authorization:** Actions are restricted based on escrow participation (tenant or landlord).
+* **Idempotency Protection:** Critical endpoints (fund, release, refund) accept idempotency keys to prevent duplicate processing.
+* **Atomic Transactions:** Database operations are wrapped in `transaction.atomic()` to ensure consistency.
+* **State Integrity:** Escrow status changes are centrally controlled in service layer to prevent direct manipulation.
+
+---
+
+## Conclusion
+
+The system is designed as a financial-grade escrow workflow rather than a simple CRUD application. It enforces strict state transitions, auditability, and transactional safety to ensure trust between tenants and landlords in the housing ecosystem.
+
+---
+

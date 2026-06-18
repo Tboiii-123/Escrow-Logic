@@ -1,0 +1,12 @@
+1
+
+
+I would tell the tenant that once they already paid through the escrow system, they can’t just move the deal outside the platform or switch to cash like that. The whole point of the escrow is to protect both sides and make sure everything is tracked properly.
+
+So once the escrow is created and the money is marked as held, the funds are locked in the system. The landlord or tenant can’t just decide to bypass it.
+
+If the tenant still wants to cancel before inspection is done, then the only proper way is to go through the refund process inside the app. The system will check if the escrow is in a valid state for refund, and if it is, it will move it to refunded and return the money back to the tenant.
+
+But if the inspection is already confirmed or the process has moved forward, then cancellation rules will depend on the state, and the system will block anything that breaks those rules.
+
+So basically, I would explain to the tenant that everything must stay inside the platform for safety, tracking, and to avoid fraud from either side.
